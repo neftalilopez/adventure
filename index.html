@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Library</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .visit-counter {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px 20px;
+            border-radius: 25px;
+            display: inline-block;
+            margin-top: 15px;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .video-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .video-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+        }
+
+        .video-header {
+            padding: 20px;
+            color: white;
+            font-size: 1.2em;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        /* Different colors for each video header */
+        .video-card:nth-child(1) .video-header { background: linear-gradient(135deg, #2c3e50, #34495e); }
+        .video-card:nth-child(2) .video-header { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+        .video-card:nth-child(3) .video-header { background: linear-gradient(135deg, #3498db, #2980b9); }
+        .video-card:nth-child(4) .video-header { background: linear-gradient(135deg, #e67e22, #d35400); }
+
+        .video-player {
+            width: 100%;
+            height: 300px;
+            background: #000;
+        }
+
+        .video-controls {
+            padding: 15px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            background: #f8f9fa;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 0.9em;
+        }
+
+        .btn-download {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-download:hover {
+            background: #218838;
+            transform: scale(1.05);
+        }
+
+        .btn-fullscreen {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-fullscreen:hover {
+            background: #0056b3;
+            transform: scale(1.05);
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .footer p {
+            margin: 5px 0;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .video-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .video-player {
+                height: 200px;
+            }
+        }
+
+        /* Modal for fullscreen video */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            max-width: 90%;
+            max-height: 90%;
+            position: relative;
+        }
+
+        .modal video {
+            width: 100%;
+            height: auto;
+            max-height: 90vh;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .close-modal:hover {
+            background: #c0392b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎬 Video Library</h1>
+            <p>Watch videos directly or download them</p>
+            <div class="visit-counter">
+                👁️ Visits: <span id="counter">0</span>
+            </div>
+        </div>
+
+        <div class="video-grid">
+            <!-- Video 1 -->
+            <div class="video-card">
+                <div class="video-header">
+                    Magic Bullet Chronicles Ryukendo
+                </div>
+                <video class="video-player" controls>
+                    <source src="Magic Bullet Chronicles Ryukendo.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+                <div class="video-controls">
+                    <button class="btn btn-fullscreen" onclick="openFullscreen('Magic Bullet Chronicles Ryukendo.mp4', 'Magic Bullet Chronicles Ryukendo')">
+                        🖥️ Fullscreen
+                    </button>
+                    <a href="Magic Bullet Chronicles Ryukendo.mp4" download class="btn btn-download">
+                        💾 Download
+                    </a>
+                </div>
+            </div>
+
+            <!-- Video 2 -->
+            <div class="video-card">
+                <div class="video-header">
+                    Disorder in the Court
+                </div>
+                <video class="video-player" controls>
+                    <source src="disorder in the court.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+                <div class="video-controls">
+                    <button class="btn btn-fullscreen" onclick="openFullscreen('disorder in the court.mp4', 'Disorder in the Court')">
+                        🖥️ Fullscreen
+                    </button>
+                    <a href="disorder in the court.mp4" download class="btn btn-download">
+                        💾 Download
+                    </a>
+                </div>
+            </div>
+
+            <!-- Video 3 -->
+            <div class="video-card">
+                <div class="video-header">
+                    The Day the Earth Stood Still
+                </div>
+                <video class="video-player" controls>
+                    <source src="The Day the Earth Stood Still.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+                <div class="video-controls">
+                    <button class="btn btn-fullscreen" onclick="openFullscreen('The Day the Earth Stood Still.mp4', 'The Day the Earth Stood Still')">
+                        🖥️ Fullscreen
+                    </button>
+                    <a href="The Day the Earth Stood Still.mp4" download class="btn btn-download">
+                        💾 Download
+                    </a>
+                </div>
+            </div>
+
+            <!-- Video 4 -->
+            <div class="video-card">
+                <div class="video-header">
+                    14 Batman vs Wizard
+                </div>
+                <video class="video-player" controls>
+                    <source src="14 Batman vs Wizard.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+                <div class="video-controls">
+                    <button class="btn btn-fullscreen" onclick="openFullscreen('14 Batman vs Wizard.mp4', '14 Batman vs Wizard')">
+                        🖥️ Fullscreen
+                    </button>
+                    <a href="14 Batman vs Wizard.mp4" download class="btn btn-download">
+                        💾 Download
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>🎥 Watch videos directly in your browser</p>
+            <p>💾 Download any video for offline viewing</p>
+            <p>🖥️ Click fullscreen for better viewing experience</p>
+        </div>
+    </div>
+
+    <!-- Fullscreen Modal -->
+    <div class="modal" id="videoModal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal()">✕ Close</button>
+            <video id="modalVideo" controls autoplay style="width: 100%;">
+                <source id="modalSource" src="" type="video/mp4">
+            </video>
+        </div>
+    </div>
+
+    <script>
+        // Visit counter using localStorage
+        function updateCounter() {
+            let count = parseInt(localStorage.getItem('visitCount') || '0');
+            count++;
+            localStorage.setItem('visitCount', count);
+            document.getElementById('counter').textContent = count;
+        }
+
+        // Fullscreen video modal
+        function openFullscreen(videoSrc, videoTitle) {
+            const modal = document.getElementById('videoModal');
+            const modalVideo = document.getElementById('modalVideo');
+            const modalSource = document.getElementById('modalSource');
+            
+            modalSource.src = videoSrc;
+            modalVideo.load();
+            modal.classList.add('active');
+            
+            // Pause all other videos
+            document.querySelectorAll('.video-player').forEach(v => v.pause());
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('videoModal');
+            const modalVideo = document.getElementById('modalVideo');
+            
+            modalVideo.pause();
+            modal.classList.remove('active');
+        }
+
+        // Close modal when clicking outside video
+        document.getElementById('videoModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Run counter on page load
+        updateCounter();
+    </script>
+</body>
+</html>
