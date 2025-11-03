@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Video Library</title>
+    <script>
+        // ⚠️ UPDATE THIS URL EVERY TIME YOU RESTART CLOUDFLARE TUNNEL ⚠️
+        const TUNNEL_URL = 'https://trials-signs-stylish-circuits.trycloudflare.com';
+        // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        // Just change the URL above when you get a new tunnel URL!
+        
+        window.TUNNEL_URL = TUNNEL_URL;
+    </script>
     <style>
         * {
             margin: 0;
@@ -223,14 +231,14 @@
                     Magic Bullet Chronicles Ryukendo
                 </div>
                 <video class="video-player" controls>
-                    <source src="Magic Bullet Chronicles Ryukendo.mp4" type="video/mp4">
+                    <source class="video-source" data-src="Magic Bullet Chronicles Ryukendo.mp4" type="video/mp4">
                     Your browser does not support the video tag.
                 </video>
                 <div class="video-controls">
                     <button class="btn btn-fullscreen" onclick="openFullscreen('Magic Bullet Chronicles Ryukendo.mp4', 'Magic Bullet Chronicles Ryukendo')">
                         🖥️ Fullscreen
                     </button>
-                    <a href="Magic Bullet Chronicles Ryukendo.mp4" download class="btn btn-download">
+                    <a href="#" class="btn btn-download download-link" data-file="Magic Bullet Chronicles Ryukendo.mp4" download="Magic Bullet Chronicles Ryukendo.mp4">
                         💾 Download
                     </a>
                 </div>
@@ -242,14 +250,14 @@
                     Disorder in the Court
                 </div>
                 <video class="video-player" controls>
-                    <source src="disorder in the court.mp4" type="video/mp4">
+                    <source class="video-source" data-src="disorder in the court.mp4" type="video/mp4">
                     Your browser does not support the video tag.
                 </video>
                 <div class="video-controls">
                     <button class="btn btn-fullscreen" onclick="openFullscreen('disorder in the court.mp4', 'Disorder in the Court')">
                         🖥️ Fullscreen
                     </button>
-                    <a href="disorder in the court.mp4" download class="btn btn-download">
+                    <a href="#" class="btn btn-download download-link" data-file="disorder in the court.mp4" download="disorder in the court.mp4">
                         💾 Download
                     </a>
                 </div>
@@ -261,14 +269,14 @@
                     The Day the Earth Stood Still
                 </div>
                 <video class="video-player" controls>
-                    <source src="The Day the Earth Stood Still.mp4" type="video/mp4">
+                    <source class="video-source" data-src="The Day the Earth Stood Still.mp4" type="video/mp4">
                     Your browser does not support the video tag.
                 </video>
                 <div class="video-controls">
                     <button class="btn btn-fullscreen" onclick="openFullscreen('The Day the Earth Stood Still.mp4', 'The Day the Earth Stood Still')">
                         🖥️ Fullscreen
                     </button>
-                    <a href="The Day the Earth Stood Still.mp4" download class="btn btn-download">
+                    <a href="#" class="btn btn-download download-link" data-file="The Day the Earth Stood Still.mp4" download="The Day the Earth Stood Still.mp4">
                         💾 Download
                     </a>
                 </div>
@@ -280,14 +288,14 @@
                     14 Batman vs Wizard
                 </div>
                 <video class="video-player" controls>
-                    <source src="14 Batman vs Wizard.mp4" type="video/mp4">
+                    <source class="video-source" data-src="14 Batman vs Wizard.mp4" type="video/mp4">
                     Your browser does not support the video tag.
                 </video>
                 <div class="video-controls">
                     <button class="btn btn-fullscreen" onclick="openFullscreen('14 Batman vs Wizard.mp4', '14 Batman vs Wizard')">
                         🖥️ Fullscreen
                     </button>
-                    <a href="14 Batman vs Wizard.mp4" download class="btn btn-download">
+                    <a href="#" class="btn btn-download download-link" data-file="14 Batman vs Wizard.mp4" download="14 Batman vs Wizard.mp4">
                         💾 Download
                     </a>
                 </div>
@@ -312,6 +320,23 @@
     </div>
 
     <script>
+        // Initialize video sources and download links with tunnel URL
+        function initializeVideoSources() {
+            const tunnelURL = window.TUNNEL_URL || '';
+            
+            // Update all video sources
+            document.querySelectorAll('.video-source').forEach(source => {
+                const filename = source.getAttribute('data-src');
+                source.src = tunnelURL + '/' + filename;
+            });
+            
+            // Update all download links
+            document.querySelectorAll('.download-link').forEach(link => {
+                const filename = link.getAttribute('data-file');
+                link.href = tunnelURL + '/' + filename;
+            });
+        }
+
         // Visit counter using localStorage
         function updateCounter() {
             let count = parseInt(localStorage.getItem('visitCount') || '0');
@@ -326,7 +351,8 @@
             const modalVideo = document.getElementById('modalVideo');
             const modalSource = document.getElementById('modalSource');
             
-            modalSource.src = videoSrc;
+            const tunnelURL = window.TUNNEL_URL || '';
+            modalSource.src = tunnelURL + '/' + videoSrc;
             modalVideo.load();
             modal.classList.add('active');
             
@@ -356,8 +382,11 @@
             }
         });
 
-        // Run counter on page load
-        updateCounter();
+        // Initialize everything on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            initializeVideoSources();
+            updateCounter();
+        });
     </script>
 </body>
 </html>
